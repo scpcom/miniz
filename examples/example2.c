@@ -33,6 +33,7 @@ static const char *s_pComment = "This is a comment";
 
 int main(int argc, char *argv[])
 {
+#ifndef MINIZ_NO_ARCHIVE_WRITING_APIS
   int i, sort_iter;
   mz_bool status;
   size_t uncomp_size;
@@ -41,6 +42,7 @@ int main(int argc, char *argv[])
   const int N = 50;
   char data[2048];
   char archive_filename[64];
+#endif
   static const char *s_Test_archive_filename = "__mz_example2_test__.zip";
 
   assert((strlen(s_pTest_str) + 64) < sizeof(data));
@@ -52,6 +54,7 @@ int main(int argc, char *argv[])
   // Delete the test archive, so it doesn't keep growing as we run this test
   remove(s_Test_archive_filename);
 
+#ifndef MINIZ_NO_ARCHIVE_WRITING_APIS
   // Append a bunch of text files to the test archive
   for (i = (N - 1); i >= 0; --i)
   {
@@ -158,6 +161,9 @@ int main(int argc, char *argv[])
     // Close the archive, freeing any resources it was using
     mz_zip_reader_end(&zip_archive);
   }
+#else
+  printf("ZIP archive API's are disabled.\n");
+#endif
 
   printf("Success.\n");
   return EXIT_SUCCESS;
