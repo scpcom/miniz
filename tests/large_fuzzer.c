@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <inttypes.h>
 
-#include "miniz.h"
+#include "cvi_miniz.h"
 
 #define CHECK_ERR(err, msg) { \
     if (err != Z_OK) { \

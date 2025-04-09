@@ -1,5 +1,5 @@
 #pragma once
-#include "miniz_common.h"
+#include "cvi_miniz_common.h"
 /* ------------------- Low-level Decompression API Definitions */
 
 #ifdef __cplusplus

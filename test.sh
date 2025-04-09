@@ -9,11 +9,11 @@ cat << "EOF" > miniz_export.h
 #define MINIZ_EXPORT
 #endif
 EOF
-g++ tests/miniz_tester.cpp tests/timer.cpp amalgamation/miniz.c -o miniz_tester -I. -ggdb -O2
+g++ tests/miniz_tester.cpp tests/timer.cpp amalgamation/cvi_miniz.c -o miniz_tester -I. -ggdb -O2
 
 for i in 1 2 3 4 5 6
 do
-    gcc examples/example$i.c amalgamation/miniz.c -o example$i -lm -I. -ggdb
+    gcc examples/example$i.c amalgamation/cvi_miniz.c -o example$i -lm -I. -ggdb
 done
 
 mkdir -p test_scratch

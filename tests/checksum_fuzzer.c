@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#include "miniz.h"
+#include "cvi_miniz.h"
 
 static const size_t kMaxSize = 1024 * 1024;
 

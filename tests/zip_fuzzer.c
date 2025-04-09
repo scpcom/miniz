@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#include "miniz.h"
+#include "cvi_miniz.h"
 
 static char filename[260];
 static unsigned char read_buf[1024 * 256];

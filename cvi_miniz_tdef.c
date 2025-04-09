@@ -24,7 +24,7 @@
  *
  **************************************************************************/
 
-#include "miniz.h"
+#include "cvi_miniz.h"
 
 #ifdef __cplusplus
 extern "C" {

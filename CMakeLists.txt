@@ -7,10 +7,10 @@ if(DEFINED PROJECT_NAME)
 endif()
 
 if(CMAKE_MINOR_VERSION LESS 12)
-  project(miniz)
+  project(cvi_miniz)
   # see issue https://gitlab.kitware.com/cmake/cmake/merge_requests/1799
 else()
-  project(miniz C)
+  project(cvi_miniz C)
 endif()
 
 set(MINIZ_API_VERSION 2)
@@ -29,7 +29,7 @@ endif ()
 
 option(BUILD_EXAMPLES "Build examples" ${MINIZ_STANDALONE_PROJECT})
 option(BUILD_FUZZERS "Build fuzz targets" OFF)
-option(AMALGAMATE_SOURCES "Amalgamate sources into miniz.h/c" OFF)
+option(AMALGAMATE_SOURCES "Amalgamate sources into cvi_miniz.h/c" OFF)
 option(BUILD_HEADER_ONLY "Build a header-only version" OFF)
 option(BUILD_SHARED_LIBS "Build shared library instead of static" ON)
 option(INSTALL_PROJECT "Install project" ${MINIZ_STANDALONE_PROJECT})
@@ -46,25 +46,25 @@ endif(BUILD_HEADER_ONLY)
 
 if(AMALGAMATE_SOURCES)
   # Amalgamate
-  file(COPY miniz.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/)
-  file(READ miniz.h MINIZ_H)
-  file(READ miniz_common.h MINIZ_COMMON_H)
-  file(READ miniz_tdef.h MINIZ_TDEF_H)
-  file(READ miniz_tinfl.h MINIZ_TINFL_H)
-  file(READ miniz_zip.h MINIZ_ZIP_H)
-  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/miniz.h
+  file(COPY cvi_miniz.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/)
+  file(READ cvi_miniz.h MINIZ_H)
+  file(READ cvi_miniz_common.h MINIZ_COMMON_H)
+  file(READ cvi_miniz_tdef.h MINIZ_TDEF_H)
+  file(READ cvi_miniz_tinfl.h MINIZ_TINFL_H)
+  file(READ cvi_miniz_zip.h MINIZ_ZIP_H)
+  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/cvi_miniz.h
      "${MINIZ_COMMON_H} ${MINIZ_TDEF_H} ${MINIZ_TINFL_H} ${MINIZ_ZIP_H}")
 
-  file(COPY miniz.c DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/)
-  file(READ miniz_tdef.c MINIZ_TDEF_C)
-  file(READ miniz_tinfl.c MINIZ_TINFL_C)
-  file(READ miniz_zip.c MINIZ_ZIP_C)
-  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/miniz.c
+  file(COPY cvi_miniz.c DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/)
+  file(READ cvi_miniz_tdef.c MINIZ_TDEF_C)
+  file(READ cvi_miniz_tinfl.c MINIZ_TINFL_C)
+  file(READ cvi_miniz_zip.c MINIZ_ZIP_C)
+  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/cvi_miniz.c
      "${MINIZ_TDEF_C} ${MINIZ_TINFL_C} ${MINIZ_ZIP_C}")
 
-  file(READ ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/miniz.h AMAL_MINIZ_H)
-  file(READ ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/miniz.c AMAL_MINIZ_C)
-  foreach(REPLACE_STRING miniz;miniz_common;miniz_tdef;miniz_tinfl;miniz_zip;miniz_export)
+  file(READ ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/cvi_miniz.h AMAL_MINIZ_H)
+  file(READ ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/cvi_miniz.c AMAL_MINIZ_C)
+  foreach(REPLACE_STRING cvi_miniz;cvi_miniz_common;cvi_miniz_tdef;cvi_miniz_tinfl;cvi_miniz_zip;cvi_miniz_export)
     string(REPLACE "#include \"${REPLACE_STRING}.h\"" "" AMAL_MINIZ_H "${AMAL_MINIZ_H}")
     string(REPLACE "#include \"${REPLACE_STRING}.h\"" "" AMAL_MINIZ_C "${AMAL_MINIZ_C}")
   endforeach()
@@ -72,7 +72,7 @@ if(AMALGAMATE_SOURCES)
   if(BUILD_HEADER_ONLY)
     string(CONCAT AMAL_MINIZ_H "${AMAL_MINIZ_H}" "\n#ifndef MINIZ_HEADER_FILE_ONLY\n"
              "${AMAL_MINIZ_C}" "\n#endif // MINIZ_HEADER_FILE_ONLY\n")
-    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/miniz.h "${AMAL_MINIZ_H}")
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/cvi_miniz.h "${AMAL_MINIZ_H}")
     add_library(${PROJECT_NAME} INTERFACE)
     
     # Might not be a good idea to force this on the library user
@@ -87,19 +87,19 @@ if(AMALGAMATE_SOURCES)
       $<INSTALL_INTERFACE:include>
     )
   else(BUILD_HEADER_ONLY)
-    string(CONCAT AMAL_MINIZ_C "#include \"miniz.h\"\n" "${AMAL_MINIZ_C}")
-    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/miniz.h "${AMAL_MINIZ_H}")
-    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/miniz.c "${AMAL_MINIZ_C}")
-    set(miniz_SOURCE ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/miniz.h
-                     ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/miniz.c)
-    add_library(${PROJECT_NAME} STATIC ${miniz_SOURCE})
+    string(CONCAT AMAL_MINIZ_C "#include \"cvi_miniz.h\"\n" "${AMAL_MINIZ_C}")
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/cvi_miniz.h "${AMAL_MINIZ_H}")
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/cvi_miniz.c "${AMAL_MINIZ_C}")
+    set(cvi_miniz_SOURCE ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/cvi_miniz.h
+                     ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/cvi_miniz.c)
+    add_library(${PROJECT_NAME} STATIC ${cvi_miniz_SOURCE})
     target_include_directories(${PROJECT_NAME} PUBLIC
       $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/amalgamation>
       $<INSTALL_INTERFACE:include>
     )
   endif(BUILD_HEADER_ONLY)
 
-  set(INSTALL_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/miniz.h)
+  set(INSTALL_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/cvi_miniz.h)
   
   file(GLOB_RECURSE ZIP_FILES RELATIVE "${CMAKE_CURRENT_BINARY_DIR}/amalgamation" "${CMAKE_CURRENT_BINARY_DIR}/amalgamation/*")
   file(GLOB_RECURSE ZIP_FILES2 RELATIVE "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/examples/*")
@@ -107,7 +107,7 @@ if(AMALGAMATE_SOURCES)
   list(APPEND ZIP_FILES "ChangeLog.md")
   list(APPEND ZIP_FILES "readme.md")
   list(APPEND ZIP_FILES "LICENSE")
-  set(ZIP_OUT_FN "${CMAKE_CURRENT_BINARY_DIR}/miniz-${MINIZ_VERSION}.zip")
+  set(ZIP_OUT_FN "${CMAKE_CURRENT_BINARY_DIR}/cvi_miniz-${MINIZ_VERSION}.zip")
   message(STATUS "Zip files: ${ZIP_FILES}")
   add_custom_command(
 		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/examples ${CMAKE_CURRENT_BINARY_DIR}/amalgamation/examples
@@ -118,7 +118,7 @@ if(AMALGAMATE_SOURCES)
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/amalgamation"
         OUTPUT  "${ZIP_OUT_FN}"
         DEPENDS ${ZIP_FILES}
-        COMMENT "Zipping to ${CMAKE_CURRENT_BINARY_DIR}/miniz.zip."
+        COMMENT "Zipping to ${CMAKE_CURRENT_BINARY_DIR}/cvi_miniz.zip."
     )
 	
 	add_custom_target(
@@ -127,8 +127,8 @@ if(AMALGAMATE_SOURCES)
 	)
 else(AMALGAMATE_SOURCES)
   include(GenerateExportHeader)
-  set(miniz_SOURCE miniz.c miniz_zip.c miniz_tinfl.c miniz_tdef.c)
-  add_library(${PROJECT_NAME} ${miniz_SOURCE})
+  set(cvi_miniz_SOURCE cvi_miniz.c cvi_miniz_zip.c cvi_miniz_tinfl.c cvi_miniz_tdef.c)
+  add_library(${PROJECT_NAME} ${cvi_miniz_SOURCE})
   generate_export_header(${PROJECT_NAME})
 
   if(NOT BUILD_SHARED_LIBS)
@@ -158,11 +158,11 @@ if(NOT BUILD_HEADER_ONLY)
     PRIVATE $<$<C_COMPILER_ID:GNU>:_GNU_SOURCE>)
 
   # pkg-config file
-  configure_file(miniz.pc.in ${CMAKE_CURRENT_BINARY_DIR}/miniz.pc @ONLY)
+  configure_file(cvi_miniz.pc.in ${CMAKE_CURRENT_BINARY_DIR}/cvi_miniz.pc @ONLY)
 
   if(INSTALL_PROJECT)
     install(FILES
-      ${CMAKE_CURRENT_BINARY_DIR}/miniz.pc
+      ${CMAKE_CURRENT_BINARY_DIR}/cvi_miniz.pc
       DESTINATION ${CMAKE_INSTALL_DATADIR}/pkgconfig)
   endif()
 endif()
@@ -178,7 +178,7 @@ if(INSTALL_PROJECT)
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR}
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    # users can use <miniz.h> or <miniz/miniz.h>
+    # users can use <cvi_miniz.h> or <cvi_miniz/cvi_miniz.h>
     INCLUDES DESTINATION include ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
   )
 
@@ -230,23 +230,23 @@ if(BUILD_EXAMPLES)
       "${CMAKE_CURRENT_SOURCE_DIR}/tests/timer.cpp")
 
   add_executable(example1 ${EXAMPLE1_SRC_LIST})
-  target_link_libraries(example1 miniz)
+  target_link_libraries(example1 cvi_miniz)
   add_executable(example2 ${EXAMPLE2_SRC_LIST})
-  target_link_libraries(example2 miniz)
+  target_link_libraries(example2 cvi_miniz)
   add_executable(example3 ${EXAMPLE3_SRC_LIST})
-  target_link_libraries(example3 miniz)
+  target_link_libraries(example3 cvi_miniz)
   add_executable(example4 ${EXAMPLE4_SRC_LIST})
-  target_link_libraries(example4 miniz)
+  target_link_libraries(example4 cvi_miniz)
   add_executable(example5 ${EXAMPLE5_SRC_LIST})
-  target_link_libraries(example5 miniz)
+  target_link_libraries(example5 cvi_miniz)
   add_executable(example6 ${EXAMPLE6_SRC_LIST})
-  target_link_libraries(example6 miniz)
+  target_link_libraries(example6 cvi_miniz)
   if(${UNIX})
       target_link_libraries(example6 m)
   endif()
 
   # add_executable(miniz_tester ${MINIZ_TESTER_SRC_LIST})
-  # target_link_libraries(miniz_tester miniz)
+  # target_link_libraries(miniz_tester cvi_miniz)
 endif(BUILD_EXAMPLES)
 
 if(BUILD_FUZZERS)
@@ -262,28 +262,28 @@ if(BUILD_FUZZERS)
   set(ZIP_FUZZER_SRC_LIST "${FUZZ_MAIN_SRC}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/zip_fuzzer.c")
 
   add_executable(checksum_fuzzer ${CHECKSUM_FUZZER_SRC_LIST})
-  target_link_libraries(checksum_fuzzer miniz)
+  target_link_libraries(checksum_fuzzer cvi_miniz)
 
   add_executable(flush_fuzzer ${FLUSH_FUZZER_SRC_LIST})
-  target_link_libraries(flush_fuzzer miniz)
+  target_link_libraries(flush_fuzzer cvi_miniz)
 
   add_executable(uncompress_fuzzer ${UNCOMPRESS_FUZZER_SRC_LIST})
-  target_link_libraries(uncompress_fuzzer miniz)
+  target_link_libraries(uncompress_fuzzer cvi_miniz)
 
   add_executable(uncompress2_fuzzer ${UNCOMPRESS2_FUZZER_SRC_LIST})
-  target_link_libraries(uncompress2_fuzzer miniz)
+  target_link_libraries(uncompress2_fuzzer cvi_miniz)
 
   add_executable(compress_fuzzer ${COMPRESS_FUZZER_SRC_LIST})
-  target_link_libraries(compress_fuzzer miniz)
+  target_link_libraries(compress_fuzzer cvi_miniz)
 
   add_executable(small_fuzzer ${SMALL_FUZZER_SRC_LIST})
-  target_link_libraries(small_fuzzer miniz)
+  target_link_libraries(small_fuzzer cvi_miniz)
 
   add_executable(large_fuzzer ${LARGE_FUZZER_SRC_LIST})
-  target_link_libraries(large_fuzzer miniz)
+  target_link_libraries(large_fuzzer cvi_miniz)
 
   add_executable(zip_fuzzer ${ZIP_FUZZER_SRC_LIST})
-  target_link_libraries(zip_fuzzer miniz)
+  target_link_libraries(zip_fuzzer cvi_miniz)
 endif()
 
 set(INCLUDE_INSTALL_DIR "include")

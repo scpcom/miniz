@@ -9,7 +9,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <inttypes.h>
-#include "miniz.h"
+#include "cvi_miniz.h"
 
 static const uint8_t *data;
 static size_t dataLen;

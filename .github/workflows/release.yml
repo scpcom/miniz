@@ -35,7 +35,7 @@ jobs:
         
       - name: Get current version
         id: relver
-        run: echo "::set-output name=relver::$(cat build/miniz.pc | grep Version | cut -d ':' -f2 | xargs)"
+        run: echo "::set-output name=relver::$(cat build/cvi_miniz.pc | grep Version | cut -d ':' -f2 | xargs)"
         
       - name: Create Release
         id: create_release
@@ -55,6 +55,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/miniz-${{ steps.relver.outputs.relver }}.zip
-          asset_name: miniz-${{ steps.relver.outputs.relver }}.zip
+          asset_path: ./build/cvi_miniz-${{ steps.relver.outputs.relver }}.zip
+          asset_name: cvi_miniz-${{ steps.relver.outputs.relver }}.zip
           asset_content_type: application/zip

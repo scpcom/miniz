@@ -3,7 +3,7 @@
 // For simplicity, this example is limited to files smaller than 4GB, but this is not a limitation of miniz.c.
 #include <stdio.h>
 #include <limits.h>
-#include "miniz.h"
+#include "cvi_miniz.h"
 
 typedef unsigned char uint8;
 typedef unsigned short uint16;

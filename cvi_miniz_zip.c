@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  *
  **************************************************************************/
-#include "miniz.h"
+#include "cvi_miniz.h"
 
 #ifndef MINIZ_NO_ARCHIVE_APIS
 
@@ -154,7 +154,7 @@ static FILE *mz_freopen(const char *pPath, const char *pMode, FILE *pStream)
 
 #define MZ_TOLOWER(c) ((((c) >= 'A') && ((c) <= 'Z')) ? ((c) - 'A' + 'a') : (c))
 
-/* Various ZIP archive enums. To completely avoid cross platform compiler alignment and platform endian issues, miniz.c doesn't use structs for any of this stuff. */
+/* Various ZIP archive enums. To completely avoid cross platform compiler alignment and platform endian issues, cvi_miniz.c doesn't use structs for any of this stuff. */
 enum
 {
     /* ZIP archive identifiers and record sizes */

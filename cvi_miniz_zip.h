@@ -1,6 +1,6 @@
 
 #pragma once
-#include "miniz_common.h"
+#include "cvi_miniz_common.h"
 
 /* ------------------- ZIP archive reading/writing */
 

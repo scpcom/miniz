@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "miniz.h"
+#include "cvi_miniz.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {

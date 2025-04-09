@@ -1,9 +1,9 @@
-/* miniz.c 2.2.0 - public domain deflate/inflate, zlib-subset, ZIP reading/writing/appending, PNG writing
+/* cvi_miniz.c 2.2.0 - public domain deflate/inflate, zlib-subset, ZIP reading/writing/appending, PNG writing
    See "unlicense" statement at the end of this file.
    Rich Geldreich <richgel99@gmail.com>, last updated Oct. 13, 2013
    Implements RFC 1950: http://www.ietf.org/rfc/rfc1950.txt and RFC 1951: http://www.ietf.org/rfc/rfc1951.txt
 
-   Most API's defined in miniz.c are optional. For example, to disable the archive related functions just define
+   Most API's defined in cvi_miniz.c are optional. For example, to disable the archive related functions just define
    MINIZ_NO_ARCHIVE_APIS, or to get rid of all stdio usage define MINIZ_NO_STDIO (see the list below for more macros).
 
    * Low-level Deflate/Inflate implementation notes:
@@ -20,7 +20,7 @@
 
    * zlib-style API notes:
 
-     miniz.c implements a fairly large subset of zlib. There's enough functionality present for it to be a drop-in
+     cvi_miniz.c implements a fairly large subset of zlib. There's enough functionality present for it to be a drop-in
      zlib replacement in many apps:
         The z_stream struct, optional memory allocation callbacks
         deflateInit/deflateInit2/deflate/deflateReset/deflateEnd/deflateBound
@@ -32,7 +32,7 @@
      Limitations:
       The callback API's are not implemented yet. No support for gzip headers or zlib static dictionaries.
       I've tried to closely emulate zlib's various flavors of stream flushing and return status codes, but
-      there are no guarantees that miniz.c pulls this off perfectly.
+      there are no guarantees that cvi_miniz.c pulls this off perfectly.
 
    * PNG writing: See the tdefl_write_image_to_png_file_in_memory() function, originally written by
      Alex Evans. Supports 1-4 bytes/pixel images.
@@ -99,22 +99,22 @@
      Requires streams capable of seeking.
 
    * This is a header file library, like stb_image.c. To get only a header file, either cut and paste the
-     below header, or create miniz.h, #define MINIZ_HEADER_FILE_ONLY, and then include miniz.c from it.
+     below header, or create cvi_miniz.h, #define MINIZ_HEADER_FILE_ONLY, and then include cvi_miniz.c from it.
 
    * Important: For best perf. be sure to customize the below macros for your target platform:
      #define MINIZ_USE_UNALIGNED_LOADS_AND_STORES 1
      #define MINIZ_LITTLE_ENDIAN 1
      #define MINIZ_HAS_64BIT_REGISTERS 1
 
-   * On platforms using glibc, Be sure to "#define _LARGEFILE64_SOURCE 1" before including miniz.c to ensure miniz
+   * On platforms using glibc, Be sure to "#define _LARGEFILE64_SOURCE 1" before including cvi_miniz.c to ensure miniz
      uses the 64-bit variants: fopen64(), stat64(), etc. Otherwise you won't be able to process large files
      (i.e. 32-bit stat() fails for me on files > 0x7FFFFFFF bytes).
 */
 #pragma once
 
-#include "miniz_export.h"
+#include "cvi_miniz_export.h"
 
-/* Defines to completely disable specific portions of miniz.c: 
+/* Defines to completely disable specific portions of cvi_miniz.c: 
    If all macros here are defined the only functionality remaining will be CRC-32, adler-32, tinfl, and tdefl. */
 
 /* Define MINIZ_NO_STDIO to disable all usage and any functions which rely on stdio for file I/O. */
@@ -192,7 +192,7 @@ extern "C" {
 
 /* ------------------- zlib-style API Definitions. */
 
-/* For more compatibility with zlib, miniz.c uses unsigned long for some parameters/struct members. Beware: mz_ulong can be either 32 or 64-bits! */
+/* For more compatibility with zlib, cvi_miniz.c uses unsigned long for some parameters/struct members. Beware: mz_ulong can be either 32 or 64-bits! */
 typedef unsigned long mz_ulong;
 
 /* mz_free() internally uses the MZ_FREE() macro (which by default calls free() unless you've modified the MZ_MALLOC macro) to release a block allocated from the heap. */
@@ -301,7 +301,7 @@ typedef struct mz_stream_s
 
 typedef mz_stream *mz_streamp;
 
-/* Returns the version string of miniz.c. */
+/* Returns the version string of cvi_miniz.c. */
 MINIZ_EXPORT const char *mz_version(void);
 
 /* mz_deflateInit() initializes a compressor with default options: */
@@ -321,7 +321,7 @@ MINIZ_EXPORT int mz_deflateInit(mz_streamp pStream, int level);
 /* Additional parameters: */
 /*   method must be MZ_DEFLATED */
 /*   window_bits must be MZ_DEFAULT_WINDOW_BITS (to wrap the deflate stream with zlib header/adler-32 footer) or -MZ_DEFAULT_WINDOW_BITS (raw deflate/no header or footer) */
-/*   mem_level must be between [1, 9] (it's checked but ignored by miniz.c) */
+/*   mem_level must be between [1, 9] (it's checked but ignored by cvi_miniz.c) */
 MINIZ_EXPORT int mz_deflateInit2(mz_streamp pStream, int level, int method, int window_bits, int mem_level, int strategy);
 
 /* Quickly resets a compressor without having to reallocate anything. Same as calling mz_deflateEnd() followed by mz_deflateInit()/mz_deflateInit2(). */
@@ -393,7 +393,7 @@ MINIZ_EXPORT int mz_uncompress2(unsigned char *pDest, mz_ulong *pDest_len, const
 /* Returns a string description of the specified error code, or NULL if the error code is invalid. */
 MINIZ_EXPORT const char *mz_error(int err);
 
-/* Redefine zlib-compatible names to miniz equivalents, so miniz.c can be used as a drop-in replacement for the subset of zlib that miniz.c supports. */
+/* Redefine zlib-compatible names to miniz equivalents, so cvi_miniz.c can be used as a drop-in replacement for the subset of zlib that cvi_miniz.c supports. */
 /* Define MINIZ_NO_ZLIB_COMPATIBLE_NAMES to disable zlib-compatibility if you use zlib in the same project. */
 #ifndef MINIZ_NO_ZLIB_COMPATIBLE_NAMES
 typedef unsigned char Byte;
@@ -476,7 +476,7 @@ typedef void *const voidpc;
 }
 #endif
 
-#include "miniz_common.h"
-#include "miniz_tdef.h"
-#include "miniz_tinfl.h"
-#include "miniz_zip.h"
+#include "cvi_miniz_common.h"
+#include "cvi_miniz_tdef.h"
+#include "cvi_miniz_tinfl.h"
+#include "cvi_miniz_zip.h"

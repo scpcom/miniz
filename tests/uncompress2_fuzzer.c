@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "miniz.h"
+#include "cvi_miniz.h"
 
 static unsigned char buffer[256 * 1024] = { 0 };
 

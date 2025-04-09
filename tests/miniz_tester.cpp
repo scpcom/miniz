@@ -15,8 +15,8 @@
   #endif
 #endif
 
-#include "miniz.h"
-#include "miniz_zip.h"
+#include "cvi_miniz.h"
+#include "cvi_miniz_zip.h"
 
 #include <stdlib.h>
 #include <stdio.h>
