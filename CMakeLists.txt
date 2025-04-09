@@ -36,6 +36,32 @@ option(INSTALL_PROJECT "Install project" ${MINIZ_STANDALONE_PROJECT})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
+if (NOT DISABLE_STATIC_FPIC)
+    # Use '-fPIC'/'-fPIE' option.
+    # This will allow other libraries to statically link in libcvi_json-c.a
+    # which in turn prevents crashes in downstream apps that may use
+    # a different JSON library with identical symbol names.
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+
+if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections")
+	if ("${DISABLE_WERROR}" STREQUAL "OFF")
+	    set(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -Werror")
+	endif()
+    set(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -Wall")
+    set(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -Wcast-qual")
+    set(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -Wno-error=deprecated-declarations")
+    set(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -Wextra")
+    set(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -Wwrite-strings")
+    set(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -Wno-unused-parameter")
+    if (NOT WIN32)
+        set(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -Wstrict-prototypes")
+    endif()
+
+    add_definitions(-D_GNU_SOURCE)
+endif()
+
 if(INSTALL_PROJECT)
   include(GNUInstallDirs)
 endif()
