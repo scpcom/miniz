@@ -9,7 +9,7 @@ extern "C" {
 /* Set TDEFL_LESS_MEMORY to 1 to use less memory (compression will be slightly slower, and raw/dynamic blocks will be output more frequently). */
 #define TDEFL_LESS_MEMORY 0
 
-/* tdefl_init() compression flags logically OR'd together (low 12 bits contain the max. number of probes per dictionary search): */
+/* cvi_tdefl_init() compression flags logically OR'd together (low 12 bits contain the max. number of probes per dictionary search): */
 /* TDEFL_DEFAULT_MAX_PROBES: The compressor defaults to 128 dictionary probes per dictionary search. 0=Huffman only, 1=Huffman+LZ (fastest/crap compression), 4095=Huffman+LZ (slowest/best compression). */
 enum
 {
@@ -40,7 +40,7 @@ enum
 };
 
 /* High level compression functions: */
-/* tdefl_compress_mem_to_heap() compresses a block in memory to a heap block allocated via malloc(). */
+/* cvi_tdefl_compress_mem_to_heap() compresses a block in memory to a heap block allocated via malloc(). */
 /* On entry: */
 /*  pSrc_buf, src_buf_len: Pointer and size of source block to compress. */
 /*  flags: The max match finder probes (default is 128) logically OR'd against the above flags. Higher probes are slower but improve compression. */
@@ -48,11 +48,11 @@ enum
 /*  Function returns a pointer to the compressed data, or NULL on failure. */
 /*  *pOut_len will be set to the compressed data's size, which could be larger than src_buf_len on uncompressible data. */
 /*  The caller must free() the returned block when it's no longer needed. */
-MINIZ_EXPORT void *tdefl_compress_mem_to_heap(const void *pSrc_buf, size_t src_buf_len, size_t *pOut_len, int flags);
+MINIZ_EXPORT void *cvi_tdefl_compress_mem_to_heap(const void *pSrc_buf, size_t src_buf_len, size_t *pOut_len, int flags);
 
-/* tdefl_compress_mem_to_mem() compresses a block in memory to another block in memory. */
+/* cvi_tdefl_compress_mem_to_mem() compresses a block in memory to another block in memory. */
 /* Returns 0 on failure. */
-MINIZ_EXPORT size_t tdefl_compress_mem_to_mem(void *pOut_buf, size_t out_buf_len, const void *pSrc_buf, size_t src_buf_len, int flags);
+MINIZ_EXPORT size_t cvi_tdefl_compress_mem_to_mem(void *pOut_buf, size_t out_buf_len, const void *pSrc_buf, size_t src_buf_len, int flags);
 
 /* Compresses an image to a compressed PNG file in memory. */
 /* On entry: */
@@ -63,15 +63,15 @@ MINIZ_EXPORT size_t tdefl_compress_mem_to_mem(void *pOut_buf, size_t out_buf_len
 /* On return: */
 /*  Function returns a pointer to the compressed data, or NULL on failure. */
 /*  *pLen_out will be set to the size of the PNG image file. */
-/*  The caller must mz_free() the returned heap block (which will typically be larger than *pLen_out) when it's no longer needed. */
-MINIZ_EXPORT void *tdefl_write_image_to_png_file_in_memory_ex(const void *pImage, int w, int h, int num_chans, size_t *pLen_out, mz_uint level, mz_bool flip);
-MINIZ_EXPORT void *tdefl_write_image_to_png_file_in_memory(const void *pImage, int w, int h, int num_chans, size_t *pLen_out);
+/*  The caller must cvi_free() the returned heap block (which will typically be larger than *pLen_out) when it's no longer needed. */
+MINIZ_EXPORT void *cvi_tdefl_write_image_to_png_file_in_memory_ex(const void *pImage, int w, int h, int num_chans, size_t *pLen_out, mz_uint level, mz_bool flip);
+MINIZ_EXPORT void *cvi_tdefl_write_image_to_png_file_in_memory(const void *pImage, int w, int h, int num_chans, size_t *pLen_out);
 
 /* Output stream interface. The compressor uses this interface to write compressed data. It'll typically be called TDEFL_OUT_BUF_SIZE at a time. */
-typedef mz_bool (*tdefl_put_buf_func_ptr)(const void *pBuf, int len, void *pUser);
+typedef mz_bool (*cvi_tdefl_put_buf_func_ptr)(const void *pBuf, int len, void *pUser);
 
-/* tdefl_compress_mem_to_output() compresses a block to an output stream. The above helpers use this function internally. */
-MINIZ_EXPORT mz_bool tdefl_compress_mem_to_output(const void *pBuf, size_t buf_len, tdefl_put_buf_func_ptr pPut_buf_func, void *pPut_buf_user, int flags);
+/* cvi_tdefl_compress_mem_to_output() compresses a block to an output stream. The above helpers use this function internally. */
+MINIZ_EXPORT mz_bool cvi_tdefl_compress_mem_to_output(const void *pBuf, size_t buf_len, cvi_tdefl_put_buf_func_ptr pPut_buf_func, void *pPut_buf_user, int flags);
 
 enum
 {
@@ -129,7 +129,7 @@ typedef enum {
 /* tdefl's compression state structure. */
 typedef struct
 {
-    tdefl_put_buf_func_ptr m_pPut_buf_func;
+    cvi_tdefl_put_buf_func_ptr m_pPut_buf_func;
     void *m_pPut_buf_user;
     mz_uint m_flags, m_max_probes[2];
     int m_greedy_parsing;
@@ -152,37 +152,37 @@ typedef struct
     mz_uint16 m_next[TDEFL_LZ_DICT_SIZE];
     mz_uint16 m_hash[TDEFL_LZ_HASH_SIZE];
     mz_uint8 m_output_buf[TDEFL_OUT_BUF_SIZE];
-} tdefl_compressor;
+} cvi_tdefl_compressor;
 
 /* Initializes the compressor. */
 /* There is no corresponding deinit() function because the tdefl API's do not dynamically allocate memory. */
-/* pBut_buf_func: If NULL, output data will be supplied to the specified callback. In this case, the user should call the tdefl_compress_buffer() API for compression. */
-/* If pBut_buf_func is NULL the user should always call the tdefl_compress() API. */
+/* pBut_buf_func: If NULL, output data will be supplied to the specified callback. In this case, the user should call the cvi_tdefl_compress_buffer() API for compression. */
+/* If pBut_buf_func is NULL the user should always call the cvi_tdefl_compress() API. */
 /* flags: See the above enums (TDEFL_HUFFMAN_ONLY, TDEFL_WRITE_ZLIB_HEADER, etc.) */
-MINIZ_EXPORT tdefl_status tdefl_init(tdefl_compressor *d, tdefl_put_buf_func_ptr pPut_buf_func, void *pPut_buf_user, int flags);
+MINIZ_EXPORT tdefl_status cvi_tdefl_init(cvi_tdefl_compressor *d, cvi_tdefl_put_buf_func_ptr pPut_buf_func, void *pPut_buf_user, int flags);
 
 /* Compresses a block of data, consuming as much of the specified input buffer as possible, and writing as much compressed data to the specified output buffer as possible. */
-MINIZ_EXPORT tdefl_status tdefl_compress(tdefl_compressor *d, const void *pIn_buf, size_t *pIn_buf_size, void *pOut_buf, size_t *pOut_buf_size, tdefl_flush flush);
+MINIZ_EXPORT tdefl_status cvi_tdefl_compress(cvi_tdefl_compressor *d, const void *pIn_buf, size_t *pIn_buf_size, void *pOut_buf, size_t *pOut_buf_size, tdefl_flush flush);
 
-/* tdefl_compress_buffer() is only usable when the tdefl_init() is called with a non-NULL tdefl_put_buf_func_ptr. */
-/* tdefl_compress_buffer() always consumes the entire input buffer. */
-MINIZ_EXPORT tdefl_status tdefl_compress_buffer(tdefl_compressor *d, const void *pIn_buf, size_t in_buf_size, tdefl_flush flush);
+/* cvi_tdefl_compress_buffer() is only usable when the cvi_tdefl_init() is called with a non-NULL cvi_tdefl_put_buf_func_ptr. */
+/* cvi_tdefl_compress_buffer() always consumes the entire input buffer. */
+MINIZ_EXPORT tdefl_status cvi_tdefl_compress_buffer(cvi_tdefl_compressor *d, const void *pIn_buf, size_t in_buf_size, tdefl_flush flush);
 
-MINIZ_EXPORT tdefl_status tdefl_get_prev_return_status(tdefl_compressor *d);
-MINIZ_EXPORT mz_uint32 tdefl_get_adler32(tdefl_compressor *d);
+MINIZ_EXPORT tdefl_status cvi_tdefl_get_prev_return_status(cvi_tdefl_compressor *d);
+MINIZ_EXPORT mz_uint32 cvi_tdefl_get_adler32(cvi_tdefl_compressor *d);
 
-/* Create tdefl_compress() flags given zlib-style compression parameters. */
+/* Create cvi_tdefl_compress() flags given zlib-style compression parameters. */
 /* level may range from [0,10] (where 10 is absolute max compression, but may be much slower on some files) */
 /* window_bits may be -15 (raw deflate) or 15 (zlib) */
 /* strategy may be either MZ_DEFAULT_STRATEGY, MZ_FILTERED, MZ_HUFFMAN_ONLY, MZ_RLE, or MZ_FIXED */
-MINIZ_EXPORT mz_uint tdefl_create_comp_flags_from_zip_params(int level, int window_bits, int strategy);
+MINIZ_EXPORT mz_uint cvi_tdefl_create_comp_flags_from_zip_params(int level, int window_bits, int strategy);
 
 #ifndef MINIZ_NO_MALLOC
-/* Allocate the tdefl_compressor structure in C so that */
+/* Allocate the cvi_tdefl_compressor structure in C so that */
 /* non-C language bindings to tdefl_ API don't need to worry about */
 /* structure size and allocation mechanism. */
-MINIZ_EXPORT tdefl_compressor *tdefl_compressor_alloc(void);
-MINIZ_EXPORT void tdefl_compressor_free(tdefl_compressor *pComp);
+MINIZ_EXPORT cvi_tdefl_compressor *cvi_tdefl_compressor_alloc(void);
+MINIZ_EXPORT void cvi_tdefl_compressor_free(cvi_tdefl_compressor *pComp);
 #endif
 
 #ifdef __cplusplus

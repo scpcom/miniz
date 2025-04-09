@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
       if ((uncomp_size != (strlen(data) + 1)) || (memcmp(p, data, strlen(data))))
       {
         printf("mz_zip_reader_extract_file_to_heap() failed to extract the proper data\n");
-        mz_free(p);
+        cvi_free(p);
         mz_zip_reader_end(&zip_archive);
         return EXIT_FAILURE;
       }
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
       printf("File data: \"%s\"\n", (const char *)p);
 
       // We're done.
-      mz_free(p);
+      cvi_free(p);
     }
 
     // Close the archive, freeing any resources it was using

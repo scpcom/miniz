@@ -163,9 +163,9 @@ typedef struct
 
     mz_uint64 m_file_offset_alignment;
 
-    mz_alloc_func m_pAlloc;
-    mz_free_func m_pFree;
-    mz_realloc_func m_pRealloc;
+    cvi_alloc_func m_pAlloc;
+    cvi_free_func m_pFree;
+    cvi_realloc_func m_pRealloc;
     void *m_pAlloc_opaque;
 
     mz_file_read_func m_pRead;
@@ -193,7 +193,7 @@ typedef struct
 
     size_t out_blk_remain;
 
-    tinfl_decompressor inflator;
+    cvi_tinfl_decompressor inflator;
 
 } mz_zip_reader_extract_iter_state;
 

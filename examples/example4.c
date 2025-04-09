@@ -79,10 +79,10 @@ int main(int argc, char *argv[])
   printf("Input file size: %u\n", infile_size);
 
   in_buf_size = infile_size;
-  status = tinfl_decompress_mem_to_callback(pCmp_data, &in_buf_size, tinfl_put_buf_func, pOutfile, TINFL_FLAG_PARSE_ZLIB_HEADER);
+  status = cvi_tinfl_decompress_mem_to_callback(pCmp_data, &in_buf_size, tinfl_put_buf_func, pOutfile, TINFL_FLAG_PARSE_ZLIB_HEADER);
   if (!status)
   {
-    printf("tinfl_decompress_mem_to_callback() failed with status %i!\n", status);
+    printf("cvi_tinfl_decompress_mem_to_callback() failed with status %i!\n", status);
     return EXIT_FAILURE;
   }
 

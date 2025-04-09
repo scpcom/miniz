@@ -218,7 +218,7 @@ static void tdefl_huffman_enforce_max_code_size(int *pNum_codes, int code_list_l
     }
 }
 
-static void tdefl_optimize_huffman_table(tdefl_compressor *d, int table_num, int table_len, int code_size_limit, int static_table)
+static void tdefl_optimize_huffman_table(cvi_tdefl_compressor *d, int table_num, int table_len, int code_size_limit, int static_table)
 {
     int i, j, l, num_codes[1 + TDEFL_MAX_SUPPORTED_HUFF_CODESIZE];
     mz_uint next_code[TDEFL_MAX_SUPPORTED_HUFF_CODESIZE + 1];
@@ -337,7 +337,7 @@ static void tdefl_optimize_huffman_table(tdefl_compressor *d, int table_num, int
 
 static mz_uint8 s_tdefl_packed_code_size_syms_swizzle[] = { 16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15 };
 
-static void tdefl_start_dynamic_block(tdefl_compressor *d)
+static void tdefl_start_dynamic_block(cvi_tdefl_compressor *d)
 {
     int num_lit_codes, num_dist_codes, num_bit_lengths;
     mz_uint i, total_code_sizes_to_pack, num_packed_code_sizes, rle_z_count, rle_repeat_count, packed_code_sizes_index;
@@ -424,7 +424,7 @@ static void tdefl_start_dynamic_block(tdefl_compressor *d)
     }
 }
 
-static void tdefl_start_static_block(tdefl_compressor *d)
+static void tdefl_start_static_block(cvi_tdefl_compressor *d)
 {
     mz_uint i;
     mz_uint8 *p = &d->m_huff_code_sizes[0][0];
@@ -449,7 +449,7 @@ static void tdefl_start_static_block(tdefl_compressor *d)
 static const mz_uint mz_bitmasks[17] = { 0x0000, 0x0001, 0x0003, 0x0007, 0x000F, 0x001F, 0x003F, 0x007F, 0x00FF, 0x01FF, 0x03FF, 0x07FF, 0x0FFF, 0x1FFF, 0x3FFF, 0x7FFF, 0xFFFF };
 
 #if MINIZ_USE_UNALIGNED_LOADS_AND_STORES && MINIZ_LITTLE_ENDIAN && MINIZ_HAS_64BIT_REGISTERS
-static mz_bool tdefl_compress_lz_codes(tdefl_compressor *d)
+static mz_bool cvi_tdefl_compress_lz_codes(cvi_tdefl_compressor *d)
 {
     mz_uint flags;
     mz_uint8 *pLZ_codes;
@@ -543,7 +543,7 @@ static mz_bool tdefl_compress_lz_codes(tdefl_compressor *d)
     return (d->m_pOutput_buf < d->m_pOutput_buf_end);
 }
 #else
-static mz_bool tdefl_compress_lz_codes(tdefl_compressor *d)
+static mz_bool cvi_tdefl_compress_lz_codes(cvi_tdefl_compressor *d)
 {
     mz_uint flags;
     mz_uint8 *pLZ_codes;
@@ -591,16 +591,16 @@ static mz_bool tdefl_compress_lz_codes(tdefl_compressor *d)
 }
 #endif /* MINIZ_USE_UNALIGNED_LOADS_AND_STORES && MINIZ_LITTLE_ENDIAN && MINIZ_HAS_64BIT_REGISTERS */
 
-static mz_bool tdefl_compress_block(tdefl_compressor *d, mz_bool static_block)
+static mz_bool cvi_tdefl_compress_block(cvi_tdefl_compressor *d, mz_bool static_block)
 {
     if (static_block)
         tdefl_start_static_block(d);
     else
         tdefl_start_dynamic_block(d);
-    return tdefl_compress_lz_codes(d);
+    return cvi_tdefl_compress_lz_codes(d);
 }
 
-static int tdefl_flush_block(tdefl_compressor *d, int flush)
+static int tdefl_flush_block(cvi_tdefl_compressor *d, int flush)
 {
     mz_uint saved_bit_buf, saved_bits_in;
     mz_uint8 *pSaved_output_buf;
@@ -631,7 +631,7 @@ static int tdefl_flush_block(tdefl_compressor *d, int flush)
     saved_bits_in = d->m_bits_in;
 
     if (!use_raw_block)
-        comp_block_succeeded = tdefl_compress_block(d, (d->m_flags & TDEFL_FORCE_ALL_STATIC_BLOCKS) || (d->m_total_lz_bytes < 48));
+        comp_block_succeeded = cvi_tdefl_compress_block(d, (d->m_flags & TDEFL_FORCE_ALL_STATIC_BLOCKS) || (d->m_total_lz_bytes < 48));
 
     /* If the block gets expanded, forget the current contents of the output buffer and send a raw block instead. */
     if (((use_raw_block) || ((d->m_total_lz_bytes) && ((d->m_pOutput_buf - pSaved_output_buf + 1U) >= d->m_total_lz_bytes))) &&
@@ -659,7 +659,7 @@ static int tdefl_flush_block(tdefl_compressor *d, int flush)
     {
         d->m_pOutput_buf = pSaved_output_buf;
         d->m_bit_buffer = saved_bit_buf, d->m_bits_in = saved_bits_in;
-        tdefl_compress_block(d, MZ_TRUE);
+        cvi_tdefl_compress_block(d, MZ_TRUE);
     }
 
     if (flush)
@@ -753,7 +753,7 @@ static mz_uint16 TDEFL_READ_UNALIGNED_WORD2(const mz_uint16* p)
 #define TDEFL_READ_UNALIGNED_WORD(p) *(const mz_uint16 *)(p)
 #define TDEFL_READ_UNALIGNED_WORD2(p) *(const mz_uint16 *)(p)
 #endif
-static MZ_FORCEINLINE void tdefl_find_match(tdefl_compressor *d, mz_uint lookahead_pos, mz_uint max_dist, mz_uint max_match_len, mz_uint *pMatch_dist, mz_uint *pMatch_len)
+static MZ_FORCEINLINE void tdefl_find_match(cvi_tdefl_compressor *d, mz_uint lookahead_pos, mz_uint max_dist, mz_uint max_match_len, mz_uint *pMatch_dist, mz_uint *pMatch_len)
 {
     mz_uint dist, pos = lookahead_pos & TDEFL_LZ_DICT_SIZE_MASK, match_len = *pMatch_len, probe_pos = pos, next_probe_pos, probe_len;
     mz_uint num_probes_left = d->m_max_probes[match_len >= 32];
@@ -806,7 +806,7 @@ static MZ_FORCEINLINE void tdefl_find_match(tdefl_compressor *d, mz_uint lookahe
     }
 }
 #else
-static MZ_FORCEINLINE void tdefl_find_match(tdefl_compressor *d, mz_uint lookahead_pos, mz_uint max_dist, mz_uint max_match_len, mz_uint *pMatch_dist, mz_uint *pMatch_len)
+static MZ_FORCEINLINE void tdefl_find_match(cvi_tdefl_compressor *d, mz_uint lookahead_pos, mz_uint max_dist, mz_uint max_match_len, mz_uint *pMatch_dist, mz_uint *pMatch_len)
 {
     mz_uint dist, pos = lookahead_pos & TDEFL_LZ_DICT_SIZE_MASK, match_len = *pMatch_len, probe_pos = pos, next_probe_pos, probe_len;
     mz_uint num_probes_left = d->m_max_probes[match_len >= 32];
@@ -862,7 +862,7 @@ static mz_uint32 TDEFL_READ_UNALIGNED_WORD32(const mz_uint8* p)
 #else
 #define TDEFL_READ_UNALIGNED_WORD32(p) *(const mz_uint32 *)(p)
 #endif
-static mz_bool tdefl_compress_fast(tdefl_compressor *d)
+static mz_bool cvi_tdefl_compress_fast(cvi_tdefl_compressor *d)
 {
     /* Faster, minimally featured LZRW1-style match+parse loop with better register utilization. Intended for applications where raw throughput is valued more highly than ratio. */
     mz_uint lookahead_pos = d->m_lookahead_pos, lookahead_size = d->m_lookahead_size, dict_size = d->m_dict_size, total_lz_bytes = d->m_total_lz_bytes, num_flags_left = d->m_num_flags_left;
@@ -1036,7 +1036,7 @@ static mz_bool tdefl_compress_fast(tdefl_compressor *d)
 }
 #endif /* MINIZ_USE_UNALIGNED_LOADS_AND_STORES && MINIZ_LITTLE_ENDIAN */
 
-static MZ_FORCEINLINE void tdefl_record_literal(tdefl_compressor *d, mz_uint8 lit)
+static MZ_FORCEINLINE void tdefl_record_literal(cvi_tdefl_compressor *d, mz_uint8 lit)
 {
     d->m_total_lz_bytes++;
     *d->m_pLZ_code_buf++ = lit;
@@ -1049,7 +1049,7 @@ static MZ_FORCEINLINE void tdefl_record_literal(tdefl_compressor *d, mz_uint8 li
     d->m_huff_count[0][lit]++;
 }
 
-static MZ_FORCEINLINE void tdefl_record_match(tdefl_compressor *d, mz_uint match_len, mz_uint match_dist)
+static MZ_FORCEINLINE void tdefl_record_match(cvi_tdefl_compressor *d, mz_uint match_len, mz_uint match_dist)
 {
     mz_uint32 s0, s1;
 
@@ -1077,7 +1077,7 @@ static MZ_FORCEINLINE void tdefl_record_match(tdefl_compressor *d, mz_uint match
     d->m_huff_count[0][s_tdefl_len_sym[match_len - TDEFL_MIN_MATCH_LEN]]++;
 }
 
-static mz_bool tdefl_compress_normal(tdefl_compressor *d)
+static mz_bool cvi_tdefl_compress_normal(cvi_tdefl_compressor *d)
 {
     const mz_uint8 *pSrc = d->m_pSrc;
     size_t src_buf_left = d->m_src_buf_left;
@@ -1222,7 +1222,7 @@ static mz_bool tdefl_compress_normal(tdefl_compressor *d)
     return MZ_TRUE;
 }
 
-static tdefl_status tdefl_flush_output_buffer(tdefl_compressor *d)
+static tdefl_status tdefl_flush_output_buffer(cvi_tdefl_compressor *d)
 {
     if (d->m_pIn_buf_size)
     {
@@ -1243,7 +1243,7 @@ static tdefl_status tdefl_flush_output_buffer(tdefl_compressor *d)
     return (d->m_finished && !d->m_output_flush_remaining) ? TDEFL_STATUS_DONE : TDEFL_STATUS_OKAY;
 }
 
-tdefl_status tdefl_compress(tdefl_compressor *d, const void *pIn_buf, size_t *pIn_buf_size, void *pOut_buf, size_t *pOut_buf_size, tdefl_flush flush)
+tdefl_status cvi_tdefl_compress(cvi_tdefl_compressor *d, const void *pIn_buf, size_t *pIn_buf_size, void *pOut_buf, size_t *pOut_buf_size, tdefl_flush flush)
 {
     if (!d)
     {
@@ -1282,18 +1282,18 @@ tdefl_status tdefl_compress(tdefl_compressor *d, const void *pIn_buf, size_t *pI
         ((d->m_flags & TDEFL_GREEDY_PARSING_FLAG) != 0) &&
         ((d->m_flags & (TDEFL_FILTER_MATCHES | TDEFL_FORCE_ALL_RAW_BLOCKS | TDEFL_RLE_MATCHES)) == 0))
     {
-        if (!tdefl_compress_fast(d))
+        if (!cvi_tdefl_compress_fast(d))
             return d->m_prev_return_status;
     }
     else
 #endif /* #if MINIZ_USE_UNALIGNED_LOADS_AND_STORES && MINIZ_LITTLE_ENDIAN */
     {
-        if (!tdefl_compress_normal(d))
+        if (!cvi_tdefl_compress_normal(d))
             return d->m_prev_return_status;
     }
 
     if ((d->m_flags & (TDEFL_WRITE_ZLIB_HEADER | TDEFL_COMPUTE_ADLER32)) && (pIn_buf))
-        d->m_adler32 = (mz_uint32)mz_adler32(d->m_adler32, (const mz_uint8 *)pIn_buf, d->m_pSrc - (const mz_uint8 *)pIn_buf);
+        d->m_adler32 = (mz_uint32)cvi_adler32(d->m_adler32, (const mz_uint8 *)pIn_buf, d->m_pSrc - (const mz_uint8 *)pIn_buf);
 
     if ((flush) && (!d->m_lookahead_size) && (!d->m_src_buf_left) && (!d->m_output_flush_remaining))
     {
@@ -1311,13 +1311,13 @@ tdefl_status tdefl_compress(tdefl_compressor *d, const void *pIn_buf, size_t *pI
     return (d->m_prev_return_status = tdefl_flush_output_buffer(d));
 }
 
-tdefl_status tdefl_compress_buffer(tdefl_compressor *d, const void *pIn_buf, size_t in_buf_size, tdefl_flush flush)
+tdefl_status cvi_tdefl_compress_buffer(cvi_tdefl_compressor *d, const void *pIn_buf, size_t in_buf_size, tdefl_flush flush)
 {
     MZ_ASSERT(d->m_pPut_buf_func);
-    return tdefl_compress(d, pIn_buf, &in_buf_size, NULL, NULL, flush);
+    return cvi_tdefl_compress(d, pIn_buf, &in_buf_size, NULL, NULL, flush);
 }
 
-tdefl_status tdefl_init(tdefl_compressor *d, tdefl_put_buf_func_ptr pPut_buf_func, void *pPut_buf_user, int flags)
+tdefl_status cvi_tdefl_init(cvi_tdefl_compressor *d, cvi_tdefl_put_buf_func_ptr pPut_buf_func, void *pPut_buf_user, int flags)
 {
     d->m_pPut_buf_func = pPut_buf_func;
     d->m_pPut_buf_user = pPut_buf_user;
@@ -1353,27 +1353,27 @@ tdefl_status tdefl_init(tdefl_compressor *d, tdefl_put_buf_func_ptr pPut_buf_fun
     return TDEFL_STATUS_OKAY;
 }
 
-tdefl_status tdefl_get_prev_return_status(tdefl_compressor *d)
+tdefl_status cvi_tdefl_get_prev_return_status(cvi_tdefl_compressor *d)
 {
     return d->m_prev_return_status;
 }
 
-mz_uint32 tdefl_get_adler32(tdefl_compressor *d)
+mz_uint32 cvi_tdefl_get_adler32(cvi_tdefl_compressor *d)
 {
     return d->m_adler32;
 }
 
-mz_bool tdefl_compress_mem_to_output(const void *pBuf, size_t buf_len, tdefl_put_buf_func_ptr pPut_buf_func, void *pPut_buf_user, int flags)
+mz_bool cvi_tdefl_compress_mem_to_output(const void *pBuf, size_t buf_len, cvi_tdefl_put_buf_func_ptr pPut_buf_func, void *pPut_buf_user, int flags)
 {
-    tdefl_compressor *pComp;
+    cvi_tdefl_compressor *pComp;
     mz_bool succeeded;
     if (((buf_len) && (!pBuf)) || (!pPut_buf_func))
         return MZ_FALSE;
-    pComp = (tdefl_compressor *)MZ_MALLOC(sizeof(tdefl_compressor));
+    pComp = (cvi_tdefl_compressor *)MZ_MALLOC(sizeof(cvi_tdefl_compressor));
     if (!pComp)
         return MZ_FALSE;
-    succeeded = (tdefl_init(pComp, pPut_buf_func, pPut_buf_user, flags) == TDEFL_STATUS_OKAY);
-    succeeded = succeeded && (tdefl_compress_buffer(pComp, pBuf, buf_len, TDEFL_FINISH) == TDEFL_STATUS_DONE);
+    succeeded = (cvi_tdefl_init(pComp, pPut_buf_func, pPut_buf_user, flags) == TDEFL_STATUS_OKAY);
+    succeeded = succeeded && (cvi_tdefl_compress_buffer(pComp, pBuf, buf_len, TDEFL_FINISH) == TDEFL_STATUS_DONE);
     MZ_FREE(pComp);
     return succeeded;
 }
@@ -1410,7 +1410,7 @@ static mz_bool tdefl_output_buffer_putter(const void *pBuf, int len, void *pUser
     return MZ_TRUE;
 }
 
-void *tdefl_compress_mem_to_heap(const void *pSrc_buf, size_t src_buf_len, size_t *pOut_len, int flags)
+void *cvi_tdefl_compress_mem_to_heap(const void *pSrc_buf, size_t src_buf_len, size_t *pOut_len, int flags)
 {
     tdefl_output_buffer out_buf;
     MZ_CLEAR_OBJ(out_buf);
@@ -1419,13 +1419,13 @@ void *tdefl_compress_mem_to_heap(const void *pSrc_buf, size_t src_buf_len, size_
     else
         *pOut_len = 0;
     out_buf.m_expandable = MZ_TRUE;
-    if (!tdefl_compress_mem_to_output(pSrc_buf, src_buf_len, tdefl_output_buffer_putter, &out_buf, flags))
+    if (!cvi_tdefl_compress_mem_to_output(pSrc_buf, src_buf_len, tdefl_output_buffer_putter, &out_buf, flags))
         return NULL;
     *pOut_len = out_buf.m_size;
     return out_buf.m_pBuf;
 }
 
-size_t tdefl_compress_mem_to_mem(void *pOut_buf, size_t out_buf_len, const void *pSrc_buf, size_t src_buf_len, int flags)
+size_t cvi_tdefl_compress_mem_to_mem(void *pOut_buf, size_t out_buf_len, const void *pSrc_buf, size_t src_buf_len, int flags)
 {
     tdefl_output_buffer out_buf;
     MZ_CLEAR_OBJ(out_buf);
@@ -1433,7 +1433,7 @@ size_t tdefl_compress_mem_to_mem(void *pOut_buf, size_t out_buf_len, const void 
         return 0;
     out_buf.m_pBuf = (mz_uint8 *)pOut_buf;
     out_buf.m_capacity = out_buf_len;
-    if (!tdefl_compress_mem_to_output(pSrc_buf, src_buf_len, tdefl_output_buffer_putter, &out_buf, flags))
+    if (!cvi_tdefl_compress_mem_to_output(pSrc_buf, src_buf_len, tdefl_output_buffer_putter, &out_buf, flags))
         return 0;
     return out_buf.m_size;
 }
@@ -1441,7 +1441,7 @@ size_t tdefl_compress_mem_to_mem(void *pOut_buf, size_t out_buf_len, const void 
 static const mz_uint s_tdefl_num_probes[11] = { 0, 1, 6, 32, 16, 32, 128, 256, 512, 768, 1500 };
 
 /* level may actually range from [0,10] (10 is a "hidden" max level, where we want a bit more compression and it's fine if throughput to fall off a cliff on some files). */
-mz_uint tdefl_create_comp_flags_from_zip_params(int level, int window_bits, int strategy)
+mz_uint cvi_tdefl_create_comp_flags_from_zip_params(int level, int window_bits, int strategy)
 {
     mz_uint comp_flags = s_tdefl_num_probes[(level >= 0) ? MZ_MIN(10, level) : MZ_DEFAULT_LEVEL] | ((level <= 3) ? TDEFL_GREEDY_PARSING_FLAG : 0);
     if (window_bits > 0)
@@ -1469,11 +1469,11 @@ mz_uint tdefl_create_comp_flags_from_zip_params(int level, int window_bits, int 
 /* Simple PNG writer function by Alex Evans, 2011. Released into the public domain: https://gist.github.com/908299, more context at
  http://altdevblogaday.org/2011/04/06/a-smaller-jpg-encoder/.
  This is actually a modification of Alex's original code so PNG files generated by this function pass pngcheck. */
-void *tdefl_write_image_to_png_file_in_memory_ex(const void *pImage, int w, int h, int num_chans, size_t *pLen_out, mz_uint level, mz_bool flip)
+void *cvi_tdefl_write_image_to_png_file_in_memory_ex(const void *pImage, int w, int h, int num_chans, size_t *pLen_out, mz_uint level, mz_bool flip)
 {
     /* Using a local copy of this array here in case MINIZ_NO_ZLIB_APIS was defined. */
     static const mz_uint s_tdefl_png_num_probes[11] = { 0, 1, 6, 32, 16, 32, 128, 256, 512, 768, 1500 };
-    tdefl_compressor *pComp = (tdefl_compressor *)MZ_MALLOC(sizeof(tdefl_compressor));
+    cvi_tdefl_compressor *pComp = (cvi_tdefl_compressor *)MZ_MALLOC(sizeof(cvi_tdefl_compressor));
     tdefl_output_buffer out_buf;
     int i, bpl = w * num_chans, y, z;
     mz_uint32 c;
@@ -1492,13 +1492,13 @@ void *tdefl_write_image_to_png_file_in_memory_ex(const void *pImage, int w, int 
     for (z = 41; z; --z)
         tdefl_output_buffer_putter(&z, 1, &out_buf);
     /* compress image data */
-    tdefl_init(pComp, tdefl_output_buffer_putter, &out_buf, s_tdefl_png_num_probes[MZ_MIN(10, level)] | TDEFL_WRITE_ZLIB_HEADER);
+    cvi_tdefl_init(pComp, tdefl_output_buffer_putter, &out_buf, s_tdefl_png_num_probes[MZ_MIN(10, level)] | TDEFL_WRITE_ZLIB_HEADER);
     for (y = 0; y < h; ++y)
     {
-        tdefl_compress_buffer(pComp, &z, 1, TDEFL_NO_FLUSH);
-        tdefl_compress_buffer(pComp, (mz_uint8 *)pImage + (flip ? (h - 1 - y) : y) * bpl, bpl, TDEFL_NO_FLUSH);
+        cvi_tdefl_compress_buffer(pComp, &z, 1, TDEFL_NO_FLUSH);
+        cvi_tdefl_compress_buffer(pComp, (mz_uint8 *)pImage + (flip ? (h - 1 - y) : y) * bpl, bpl, TDEFL_NO_FLUSH);
     }
-    if (tdefl_compress_buffer(pComp, NULL, 0, TDEFL_FINISH) != TDEFL_STATUS_DONE)
+    if (cvi_tdefl_compress_buffer(pComp, NULL, 0, TDEFL_FINISH) != TDEFL_STATUS_DONE)
     {
         MZ_FREE(pComp);
         MZ_FREE(out_buf.m_pBuf);
@@ -1526,7 +1526,7 @@ void *tdefl_write_image_to_png_file_in_memory_ex(const void *pImage, int w, int 
         pnghdr[34] = (mz_uint8)(*pLen_out >> 16);
         pnghdr[35] = (mz_uint8)(*pLen_out >> 8);
         pnghdr[36] = (mz_uint8)*pLen_out;
-        c = (mz_uint32)mz_crc32(MZ_CRC32_INIT, pnghdr + 12, 17);
+        c = (mz_uint32)cvi_crc32(MZ_CRC32_INIT, pnghdr + 12, 17);
         for (i = 0; i < 4; ++i, c <<= 8)
             ((mz_uint8 *)(pnghdr + 29))[i] = (mz_uint8)(c >> 24);
         memcpy(out_buf.m_pBuf, pnghdr, 41);
@@ -1539,7 +1539,7 @@ void *tdefl_write_image_to_png_file_in_memory_ex(const void *pImage, int w, int 
         MZ_FREE(out_buf.m_pBuf);
         return NULL;
     }
-    c = (mz_uint32)mz_crc32(MZ_CRC32_INIT, out_buf.m_pBuf + 41 - 4, *pLen_out + 4);
+    c = (mz_uint32)cvi_crc32(MZ_CRC32_INIT, out_buf.m_pBuf + 41 - 4, *pLen_out + 4);
     for (i = 0; i < 4; ++i, c <<= 8)
         (out_buf.m_pBuf + out_buf.m_size - 16)[i] = (mz_uint8)(c >> 24);
     /* compute final size of file, grab compressed data buffer and return */
@@ -1547,22 +1547,22 @@ void *tdefl_write_image_to_png_file_in_memory_ex(const void *pImage, int w, int 
     MZ_FREE(pComp);
     return out_buf.m_pBuf;
 }
-void *tdefl_write_image_to_png_file_in_memory(const void *pImage, int w, int h, int num_chans, size_t *pLen_out)
+void *cvi_tdefl_write_image_to_png_file_in_memory(const void *pImage, int w, int h, int num_chans, size_t *pLen_out)
 {
     /* Level 6 corresponds to TDEFL_DEFAULT_MAX_PROBES or MZ_DEFAULT_LEVEL (but we can't depend on MZ_DEFAULT_LEVEL being available in case the zlib API's where #defined out) */
-    return tdefl_write_image_to_png_file_in_memory_ex(pImage, w, h, num_chans, pLen_out, 6, MZ_FALSE);
+    return cvi_tdefl_write_image_to_png_file_in_memory_ex(pImage, w, h, num_chans, pLen_out, 6, MZ_FALSE);
 }
 
 #ifndef MINIZ_NO_MALLOC
-/* Allocate the tdefl_compressor and tinfl_decompressor structures in C so that */
+/* Allocate the cvi_tdefl_compressor and cvi_tinfl_decompressor structures in C so that */
 /* non-C language bindings to tdefL_ and tinfl_ API don't need to worry about */
 /* structure size and allocation mechanism. */
-tdefl_compressor *tdefl_compressor_alloc()
+cvi_tdefl_compressor *cvi_tdefl_compressor_alloc()
 {
-    return (tdefl_compressor *)MZ_MALLOC(sizeof(tdefl_compressor));
+    return (cvi_tdefl_compressor *)MZ_MALLOC(sizeof(cvi_tdefl_compressor));
 }
 
-void tdefl_compressor_free(tdefl_compressor *pComp)
+void cvi_tdefl_compressor_free(cvi_tdefl_compressor *pComp)
 {
     MZ_FREE(pComp);
 }

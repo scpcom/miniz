@@ -36,7 +36,7 @@ extern "C" {
 
 /* ------------------- zlib-style API's */
 
-mz_ulong mz_adler32(mz_ulong adler, const unsigned char *ptr, size_t buf_len)
+mz_ulong cvi_adler32(mz_ulong adler, const unsigned char *ptr, size_t buf_len)
 {
     mz_uint32 i, s1 = (mz_uint32)(adler & 0xffff), s2 = (mz_uint32)(adler >> 16);
     size_t block_len = buf_len % 5552;
@@ -66,7 +66,7 @@ mz_ulong mz_adler32(mz_ulong adler, const unsigned char *ptr, size_t buf_len)
 
 /* Karl Malbrain's compact CRC-32. See "A compact CCITT crc16 and crc32 C implementation that balances processor cache usage against speed": http://www.geocities.com/malbrain/ */
 #if 0
-    mz_ulong mz_crc32(mz_ulong crc, const mz_uint8 *ptr, size_t buf_len)
+    mz_ulong cvi_crc32(mz_ulong crc, const mz_uint8 *ptr, size_t buf_len)
     {
         static const mz_uint32 s_crc32[16] = { 0, 0x1db71064, 0x3b6e20c8, 0x26d930ac, 0x76dc4190, 0x6b6b51f4, 0x4db26158, 0x5005713c,
                                                0xedb88320, 0xf00f9344, 0xd6d6a3e8, 0xcb61b38c, 0x9b64c2b0, 0x86d3d2d4, 0xa00ae278, 0xbdbdf21c };
@@ -84,14 +84,14 @@ mz_ulong mz_adler32(mz_ulong adler, const unsigned char *ptr, size_t buf_len)
     }
 #elif defined(USE_EXTERNAL_MZCRC)
 /* If USE_EXTERNAL_CRC is defined, an external module will export the
- * mz_crc32() symbol for us to use, e.g. an SSE-accelerated version.
+ * cvi_crc32() symbol for us to use, e.g. an SSE-accelerated version.
  * Depending on the impl, it may be necessary to ~ the input/output crc values.
  */
-mz_ulong mz_crc32(mz_ulong crc, const mz_uint8 *ptr, size_t buf_len);
+mz_ulong cvi_crc32(mz_ulong crc, const mz_uint8 *ptr, size_t buf_len);
 #else
 /* Faster, but larger CPU cache footprint.
  */
-mz_ulong mz_crc32(mz_ulong crc, const mz_uint8 *ptr, size_t buf_len)
+mz_ulong cvi_crc32(mz_ulong crc, const mz_uint8 *ptr, size_t buf_len)
 {
     static const mz_uint32 s_crc_table[256] =
         {
@@ -158,43 +158,43 @@ mz_ulong mz_crc32(mz_ulong crc, const mz_uint8 *ptr, size_t buf_len)
 }
 #endif
 
-void mz_free(void *p)
+void cvi_free(void *p)
 {
     MZ_FREE(p);
 }
 
-MINIZ_EXPORT void *miniz_def_alloc_func(void *opaque, size_t items, size_t size)
+MINIZ_EXPORT void *cvi_cvi_miniz_def_alloc_func(void *opaque, size_t items, size_t size)
 {
     (void)opaque, (void)items, (void)size;
     return MZ_MALLOC(items * size);
 }
-MINIZ_EXPORT void miniz_def_free_func(void *opaque, void *address)
+MINIZ_EXPORT void cvi_cvi_miniz_def_free_func(void *opaque, void *address)
 {
     (void)opaque, (void)address;
     MZ_FREE(address);
 }
-MINIZ_EXPORT void *miniz_def_realloc_func(void *opaque, void *address, size_t items, size_t size)
+MINIZ_EXPORT void *cvi_cvi_miniz_def_realloc_func(void *opaque, void *address, size_t items, size_t size)
 {
     (void)opaque, (void)address, (void)items, (void)size;
     return MZ_REALLOC(address, items * size);
 }
 
-const char *mz_version(void)
+const char *cvi_version(void)
 {
     return MZ_VERSION;
 }
 
 #ifndef MINIZ_NO_ZLIB_APIS
 
-int mz_deflateInit(mz_streamp pStream, int level)
+int cvi_deflateInit(cvi_streamp pStream, int level)
 {
-    return mz_deflateInit2(pStream, level, MZ_DEFLATED, MZ_DEFAULT_WINDOW_BITS, 9, MZ_DEFAULT_STRATEGY);
+    return cvi_deflateInit2(pStream, level, MZ_DEFLATED, MZ_DEFAULT_WINDOW_BITS, 9, MZ_DEFAULT_STRATEGY);
 }
 
-int mz_deflateInit2(mz_streamp pStream, int level, int method, int window_bits, int mem_level, int strategy)
+int cvi_deflateInit2(cvi_streamp pStream, int level, int method, int window_bits, int mem_level, int strategy)
 {
-    tdefl_compressor *pComp;
-    mz_uint comp_flags = TDEFL_COMPUTE_ADLER32 | tdefl_create_comp_flags_from_zip_params(level, window_bits, strategy);
+    cvi_tdefl_compressor *pComp;
+    mz_uint comp_flags = TDEFL_COMPUTE_ADLER32 | cvi_tdefl_create_comp_flags_from_zip_params(level, window_bits, strategy);
 
     if (!pStream)
         return MZ_STREAM_ERROR;
@@ -208,35 +208,35 @@ int mz_deflateInit2(mz_streamp pStream, int level, int method, int window_bits, 
     pStream->total_in = 0;
     pStream->total_out = 0;
     if (!pStream->zalloc)
-        pStream->zalloc = miniz_def_alloc_func;
+        pStream->zalloc = cvi_cvi_miniz_def_alloc_func;
     if (!pStream->zfree)
-        pStream->zfree = miniz_def_free_func;
+        pStream->zfree = cvi_cvi_miniz_def_free_func;
 
-    pComp = (tdefl_compressor *)pStream->zalloc(pStream->opaque, 1, sizeof(tdefl_compressor));
+    pComp = (cvi_tdefl_compressor *)pStream->zalloc(pStream->opaque, 1, sizeof(cvi_tdefl_compressor));
     if (!pComp)
         return MZ_MEM_ERROR;
 
     pStream->state = (struct mz_internal_state *)pComp;
 
-    if (tdefl_init(pComp, NULL, NULL, comp_flags) != TDEFL_STATUS_OKAY)
+    if (cvi_tdefl_init(pComp, NULL, NULL, comp_flags) != TDEFL_STATUS_OKAY)
     {
-        mz_deflateEnd(pStream);
+        cvi_deflateEnd(pStream);
         return MZ_PARAM_ERROR;
     }
 
     return MZ_OK;
 }
 
-int mz_deflateReset(mz_streamp pStream)
+int cvi_deflateReset(cvi_streamp pStream)
 {
     if ((!pStream) || (!pStream->state) || (!pStream->zalloc) || (!pStream->zfree))
         return MZ_STREAM_ERROR;
     pStream->total_in = pStream->total_out = 0;
-    tdefl_init((tdefl_compressor *)pStream->state, NULL, NULL, ((tdefl_compressor *)pStream->state)->m_flags);
+    cvi_tdefl_init((cvi_tdefl_compressor *)pStream->state, NULL, NULL, ((cvi_tdefl_compressor *)pStream->state)->m_flags);
     return MZ_OK;
 }
 
-int mz_deflate(mz_streamp pStream, int flush)
+int cvi_deflate(cvi_streamp pStream, int flush)
 {
     size_t in_bytes, out_bytes;
     mz_ulong orig_total_in, orig_total_out;
@@ -250,7 +250,7 @@ int mz_deflate(mz_streamp pStream, int flush)
     if (flush == MZ_PARTIAL_FLUSH)
         flush = MZ_SYNC_FLUSH;
 
-    if (((tdefl_compressor *)pStream->state)->m_prev_return_status == TDEFL_STATUS_DONE)
+    if (((cvi_tdefl_compressor *)pStream->state)->m_prev_return_status == TDEFL_STATUS_DONE)
         return (flush == MZ_FINISH) ? MZ_STREAM_END : MZ_BUF_ERROR;
 
     orig_total_in = pStream->total_in;
@@ -261,11 +261,11 @@ int mz_deflate(mz_streamp pStream, int flush)
         in_bytes = pStream->avail_in;
         out_bytes = pStream->avail_out;
 
-        defl_status = tdefl_compress((tdefl_compressor *)pStream->state, pStream->next_in, &in_bytes, pStream->next_out, &out_bytes, (tdefl_flush)flush);
+        defl_status = cvi_tdefl_compress((cvi_tdefl_compressor *)pStream->state, pStream->next_in, &in_bytes, pStream->next_out, &out_bytes, (tdefl_flush)flush);
         pStream->next_in += (mz_uint)in_bytes;
         pStream->avail_in -= (mz_uint)in_bytes;
         pStream->total_in += (mz_uint)in_bytes;
-        pStream->adler = tdefl_get_adler32((tdefl_compressor *)pStream->state);
+        pStream->adler = cvi_tdefl_get_adler32((cvi_tdefl_compressor *)pStream->state);
 
         pStream->next_out += (mz_uint)out_bytes;
         pStream->avail_out -= (mz_uint)out_bytes;
@@ -294,7 +294,7 @@ int mz_deflate(mz_streamp pStream, int flush)
     return mz_status;
 }
 
-int mz_deflateEnd(mz_streamp pStream)
+int cvi_deflateEnd(cvi_streamp pStream)
 {
     if (!pStream)
         return MZ_STREAM_ERROR;
@@ -306,17 +306,17 @@ int mz_deflateEnd(mz_streamp pStream)
     return MZ_OK;
 }
 
-mz_ulong mz_deflateBound(mz_streamp pStream, mz_ulong source_len)
+mz_ulong cvi_deflateBound(cvi_streamp pStream, mz_ulong source_len)
 {
     (void)pStream;
     /* This is really over conservative. (And lame, but it's actually pretty tricky to compute a true upper bound given the way tdefl's blocking works.) */
     return MZ_MAX(128 + (source_len * 110) / 100, 128 + source_len + ((source_len / (31 * 1024)) + 1) * 5);
 }
 
-int mz_compress2(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len, int level)
+int cvi_compress2(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len, int level)
 {
     int status;
-    mz_stream stream;
+    cvi_stream stream;
     memset(&stream, 0, sizeof(stream));
 
     /* In case mz_ulong is 64-bits (argh I hate longs). */
@@ -328,41 +328,41 @@ int mz_compress2(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char 
     stream.next_out = pDest;
     stream.avail_out = (mz_uint32)*pDest_len;
 
-    status = mz_deflateInit(&stream, level);
+    status = cvi_deflateInit(&stream, level);
     if (status != MZ_OK)
         return status;
 
-    status = mz_deflate(&stream, MZ_FINISH);
+    status = cvi_deflate(&stream, MZ_FINISH);
     if (status != MZ_STREAM_END)
     {
-        mz_deflateEnd(&stream);
+        cvi_deflateEnd(&stream);
         return (status == MZ_OK) ? MZ_BUF_ERROR : status;
     }
 
     *pDest_len = stream.total_out;
-    return mz_deflateEnd(&stream);
+    return cvi_deflateEnd(&stream);
 }
 
-int mz_compress(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len)
+int cvi_compress(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len)
 {
-    return mz_compress2(pDest, pDest_len, pSource, source_len, MZ_DEFAULT_COMPRESSION);
+    return cvi_compress2(pDest, pDest_len, pSource, source_len, MZ_DEFAULT_COMPRESSION);
 }
 
-mz_ulong mz_compressBound(mz_ulong source_len)
+mz_ulong cvi_compressBound(mz_ulong source_len)
 {
-    return mz_deflateBound(NULL, source_len);
+    return cvi_deflateBound(NULL, source_len);
 }
 
 typedef struct
 {
-    tinfl_decompressor m_decomp;
+    cvi_tinfl_decompressor m_decomp;
     mz_uint m_dict_ofs, m_dict_avail, m_first_call, m_has_flushed;
     int m_window_bits;
     mz_uint8 m_dict[TINFL_LZ_DICT_SIZE];
     tinfl_status m_last_status;
 } inflate_state;
 
-int mz_inflateInit2(mz_streamp pStream, int window_bits)
+int cvi_inflateInit2(cvi_streamp pStream, int window_bits)
 {
     inflate_state *pDecomp;
     if (!pStream)
@@ -377,9 +377,9 @@ int mz_inflateInit2(mz_streamp pStream, int window_bits)
     pStream->total_out = 0;
     pStream->reserved = 0;
     if (!pStream->zalloc)
-        pStream->zalloc = miniz_def_alloc_func;
+        pStream->zalloc = cvi_cvi_miniz_def_alloc_func;
     if (!pStream->zfree)
-        pStream->zfree = miniz_def_free_func;
+        pStream->zfree = cvi_cvi_miniz_def_free_func;
 
     pDecomp = (inflate_state *)pStream->zalloc(pStream->opaque, 1, sizeof(inflate_state));
     if (!pDecomp)
@@ -398,12 +398,12 @@ int mz_inflateInit2(mz_streamp pStream, int window_bits)
     return MZ_OK;
 }
 
-int mz_inflateInit(mz_streamp pStream)
+int cvi_inflateInit(cvi_streamp pStream)
 {
-    return mz_inflateInit2(pStream, MZ_DEFAULT_WINDOW_BITS);
+    return cvi_inflateInit2(pStream, MZ_DEFAULT_WINDOW_BITS);
 }
 
-int mz_inflateReset(mz_streamp pStream)
+int cvi_inflateReset(cvi_streamp pStream)
 {
     inflate_state *pDecomp;
     if (!pStream)
@@ -429,7 +429,7 @@ int mz_inflateReset(mz_streamp pStream)
     return MZ_OK;
 }
 
-int mz_inflate(mz_streamp pStream, int flush)
+int cvi_inflate(cvi_streamp pStream, int flush)
 {
     inflate_state *pState;
     mz_uint n, first_call, decomp_flags = TINFL_FLAG_COMPUTE_ADLER32;
@@ -463,7 +463,7 @@ int mz_inflate(mz_streamp pStream, int flush)
         decomp_flags |= TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF;
         in_bytes = pStream->avail_in;
         out_bytes = pStream->avail_out;
-        status = tinfl_decompress(&pState->m_decomp, pStream->next_in, &in_bytes, pStream->next_out, pStream->next_out, &out_bytes, decomp_flags);
+        status = cvi_tinfl_decompress(&pState->m_decomp, pStream->next_in, &in_bytes, pStream->next_out, pStream->next_out, &out_bytes, decomp_flags);
         pState->m_last_status = status;
         pStream->next_in += (mz_uint)in_bytes;
         pStream->avail_in -= (mz_uint)in_bytes;
@@ -503,7 +503,7 @@ int mz_inflate(mz_streamp pStream, int flush)
         in_bytes = pStream->avail_in;
         out_bytes = TINFL_LZ_DICT_SIZE - pState->m_dict_ofs;
 
-        status = tinfl_decompress(&pState->m_decomp, pStream->next_in, &in_bytes, pState->m_dict, pState->m_dict + pState->m_dict_ofs, &out_bytes, decomp_flags);
+        status = cvi_tinfl_decompress(&pState->m_decomp, pStream->next_in, &in_bytes, pState->m_dict, pState->m_dict + pState->m_dict_ofs, &out_bytes, decomp_flags);
         pState->m_last_status = status;
 
         pStream->next_in += (mz_uint)in_bytes;
@@ -541,7 +541,7 @@ int mz_inflate(mz_streamp pStream, int flush)
     return ((status == TINFL_STATUS_DONE) && (!pState->m_dict_avail)) ? MZ_STREAM_END : MZ_OK;
 }
 
-int mz_inflateEnd(mz_streamp pStream)
+int cvi_inflateEnd(cvi_streamp pStream)
 {
     if (!pStream)
         return MZ_STREAM_ERROR;
@@ -552,9 +552,9 @@ int mz_inflateEnd(mz_streamp pStream)
     }
     return MZ_OK;
 }
-int mz_uncompress2(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong *pSource_len)
+int cvi_uncompress2(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong *pSource_len)
 {
-    mz_stream stream;
+    cvi_stream stream;
     int status;
     memset(&stream, 0, sizeof(stream));
 
@@ -567,28 +567,28 @@ int mz_uncompress2(unsigned char *pDest, mz_ulong *pDest_len, const unsigned cha
     stream.next_out = pDest;
     stream.avail_out = (mz_uint32)*pDest_len;
 
-    status = mz_inflateInit(&stream);
+    status = cvi_inflateInit(&stream);
     if (status != MZ_OK)
         return status;
 
-    status = mz_inflate(&stream, MZ_FINISH);
+    status = cvi_inflate(&stream, MZ_FINISH);
     *pSource_len = *pSource_len - stream.avail_in;
     if (status != MZ_STREAM_END)
     {
-        mz_inflateEnd(&stream);
+        cvi_inflateEnd(&stream);
         return ((status == MZ_BUF_ERROR) && (!stream.avail_in)) ? MZ_DATA_ERROR : status;
     }
     *pDest_len = stream.total_out;
 
-    return mz_inflateEnd(&stream);
+    return cvi_inflateEnd(&stream);
 }
 
-int mz_uncompress(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len)
+int cvi_uncompress(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len)
 {
-    return mz_uncompress2(pDest, pDest_len, pSource, &source_len);
+    return cvi_uncompress2(pDest, pDest_len, pSource, &source_len);
 }
 
-const char *mz_error(int err)
+const char *cvi_error(int err)
 {
     static struct
     {

@@ -141,9 +141,9 @@ int main(int argc, char *argv[])
   // Now write the PNG image.
   {
     size_t png_data_size = 0;
-    void *pPNG_data = tdefl_write_image_to_png_file_in_memory_ex(pImage, iXmax, iYmax, 3, &png_data_size, 6, MZ_FALSE);
+    void *pPNG_data = cvi_tdefl_write_image_to_png_file_in_memory_ex(pImage, iXmax, iYmax, 3, &png_data_size, 6, MZ_FALSE);
     if (!pPNG_data)
-      fprintf(stderr, "tdefl_write_image_to_png_file_in_memory_ex() failed!\n");
+      fprintf(stderr, "cvi_tdefl_write_image_to_png_file_in_memory_ex() failed!\n");
     else
     {
       FILE *pFile = fopen(pFilename, "wb");
@@ -152,8 +152,8 @@ int main(int argc, char *argv[])
       printf("Wrote %s\n", pFilename);
     }
 
-    // mz_free() is by default just an alias to free() internally, but if you've overridden miniz's allocation funcs you'll probably need to call mz_free().
-    mz_free(pPNG_data);
+    // cvi_free() is by default just an alias to free() internally, but if you've overridden miniz's allocation funcs you'll probably need to call cvi_free().
+    cvi_free(pPNG_data);
   }
 
   free(pImage);

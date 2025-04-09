@@ -1,4 +1,4 @@
-// example5.c - Demonstrates how to use miniz.c's low-level tdefl_compress() and tinfl_inflate() API's for simple file to file compression/decompression.
+// example5.c - Demonstrates how to use miniz.c's low-level cvi_tdefl_compress() and tinfl_inflate() API's for simple file to file compression/decompression.
 // The low-level API's are the fastest, make no use of dynamic memory allocation, and are the most flexible functions exposed by miniz.c.
 // Public domain, April 11 2012, Rich Geldreich, richgel99@gmail.com. See "unlicense" statement at the end of tinfl.c.
 // For simplicity, this example is limited to files smaller than 4GB, but this is not a limitation of miniz.c.
@@ -37,9 +37,9 @@ static uint8 s_inbuf[IN_BUF_SIZE];
 #define OUT_BUF_SIZE (1024*512)
 static uint8 s_outbuf[OUT_BUF_SIZE];
 
-// tdefl_compressor contains all the state needed by the low-level compressor so it's a pretty big struct (~300k).
+// cvi_tdefl_compressor contains all the state needed by the low-level compressor so it's a pretty big struct (~300k).
 // This example makes it a global vs. putting it on the stack, of course in real-world usage you'll probably malloc() or new it.
-tdefl_compressor g_deflator;
+cvi_tdefl_compressor g_deflator;
 
 int main(int argc, char *argv[])
 {
@@ -159,16 +159,16 @@ int main(int argc, char *argv[])
       tdefl_status status;
       uint infile_remaining = infile_size;
 
-      // create tdefl() compatible flags (we have to compose the low-level flags ourselves, or use tdefl_create_comp_flags_from_zip_params() but that means MINIZ_NO_ZLIB_APIS can't be defined).
+      // create tdefl() compatible flags (we have to compose the low-level flags ourselves, or use cvi_tdefl_create_comp_flags_from_zip_params() but that means MINIZ_NO_ZLIB_APIS can't be defined).
       mz_uint comp_flags = TDEFL_WRITE_ZLIB_HEADER | s_tdefl_num_probes[MZ_MIN(10, level)] | ((level <= 3) ? TDEFL_GREEDY_PARSING_FLAG : 0);
       if (!level)
          comp_flags |= TDEFL_FORCE_ALL_RAW_BLOCKS;
 
       // Initialize the low-level compressor.
-      status = tdefl_init(&g_deflator, NULL, NULL, comp_flags);
+      status = cvi_tdefl_init(&g_deflator, NULL, NULL, comp_flags);
       if (status != TDEFL_STATUS_OKAY)
       {
-         printf("tdefl_init() failed!\n");
+         printf("cvi_tdefl_init() failed!\n");
          return EXIT_FAILURE;
       }
 
@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
          in_bytes = avail_in;
          out_bytes = avail_out;
          // Compress as much of the input as possible (or all of it) to the output buffer.
-         status = tdefl_compress(&g_deflator, next_in, &in_bytes, next_out, &out_bytes, infile_remaining ? TDEFL_NO_FLUSH : TDEFL_FINISH);
+         status = cvi_tdefl_compress(&g_deflator, next_in, &in_bytes, next_out, &out_bytes, infile_remaining ? TDEFL_NO_FLUSH : TDEFL_FINISH);
 
          next_in = (const char *)next_in + in_bytes;
          avail_in -= in_bytes;
@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
          else if (status != TDEFL_STATUS_OKAY)
          {
             // Compression somehow failed.
-            printf("tdefl_compress() failed with status %i!\n", status);
+            printf("cvi_tdefl_compress() failed with status %i!\n", status);
             return EXIT_FAILURE;
          }
       }
@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
       // Decompression.
       uint infile_remaining = infile_size;
 
-      tinfl_decompressor inflator;
+      cvi_tinfl_decompressor inflator;
       tinfl_init(&inflator);
 
       for ( ; ; )
@@ -267,7 +267,7 @@ int main(int argc, char *argv[])
 
          in_bytes = avail_in;
          out_bytes = avail_out;
-         status = tinfl_decompress(&inflator, (const mz_uint8 *)next_in, &in_bytes, s_outbuf, (mz_uint8 *)next_out, &out_bytes, (infile_remaining ? TINFL_FLAG_HAS_MORE_INPUT : 0) | TINFL_FLAG_PARSE_ZLIB_HEADER);
+         status = cvi_tinfl_decompress(&inflator, (const mz_uint8 *)next_in, &in_bytes, s_outbuf, (mz_uint8 *)next_out, &out_bytes, (infile_remaining ? TINFL_FLAG_HAS_MORE_INPUT : 0) | TINFL_FLAG_PARSE_ZLIB_HEADER);
 
          avail_in -= in_bytes;
          next_in = (const mz_uint8 *)next_in + in_bytes;
@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
             else
             {
                // Decompression failed.
-               printf("tinfl_decompress() failed with status %i!\n", status);
+               printf("cvi_tinfl_decompress() failed with status %i!\n", status);
                return EXIT_FAILURE;
             }
          }

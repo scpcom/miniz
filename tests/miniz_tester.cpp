@@ -257,7 +257,7 @@ static int simple_test1(const comp_options &options)
   const char *p = "This is a test.This is a test.This is a test.1234567This is a test.This is a test.123456";
   size_t uncomp_len = strlen(p);
 
-  void *pComp_data = tdefl_compress_mem_to_heap(p, uncomp_len, &cmp_len, TDEFL_WRITE_ZLIB_HEADER);
+  void *pComp_data = cvi_tdefl_compress_mem_to_heap(p, uncomp_len, &cmp_len, TDEFL_WRITE_ZLIB_HEADER);
   if (!pComp_data)
   {
     free(pComp_data);
@@ -268,7 +268,7 @@ static int simple_test1(const comp_options &options)
   printf("Uncompressed size: %u\nCompressed size: %u\n", (uint)uncomp_len, (uint)cmp_len);
 
   size_t decomp_len = 0;
-  void *pDecomp_data = tinfl_decompress_mem_to_heap(pComp_data, cmp_len, &decomp_len, TINFL_FLAG_PARSE_ZLIB_HEADER);
+  void *pDecomp_data = cvi_tinfl_decompress_mem_to_heap(pComp_data, cmp_len, &decomp_len, TINFL_FLAG_PARSE_ZLIB_HEADER);
 
   if ((!pDecomp_data) || (decomp_len != uncomp_len) || (memcmp(pDecomp_data, p, uncomp_len)))
   {
@@ -869,8 +869,8 @@ static bool zip_create(const char *pZip_filename, const char *pSrc_filename)
 
   const char *pStr = "This is a test!This is a test!This is a test!\n";
   size_t comp_size;
-  void *pComp_data = tdefl_compress_mem_to_heap(pStr, strlen(pStr), &comp_size, 256);
-  success &= mz_zip_writer_add_mem_ex(&zip, "precomp.txt", pComp_data, comp_size, "Comment", (uint16)strlen("Comment"), MZ_ZIP_FLAG_COMPRESSED_DATA, strlen(pStr), mz_crc32(MZ_CRC32_INIT, (const uint8 *)pStr, strlen(pStr)));
+  void *pComp_data = cvi_tdefl_compress_mem_to_heap(pStr, strlen(pStr), &comp_size, 256);
+  success &= mz_zip_writer_add_mem_ex(&zip, "precomp.txt", pComp_data, comp_size, "Comment", (uint16)strlen("Comment"), MZ_ZIP_FLAG_COMPRESSED_DATA, strlen(pStr), cvi_crc32(MZ_CRC32_INIT, (const uint8 *)pStr, strlen(pStr)));
 
   success &= mz_zip_writer_add_mem(&zip, "cool/", NULL, 0, 0);
 
@@ -1376,7 +1376,7 @@ static size_t dummy_zip_file_write_callback(void *pOpaque, mz_uint64 ofs, const 
 {
   (void)ofs; (void)pBuf;
   uint32 *pCRC = (uint32*)pOpaque;
-  *pCRC = mz_crc32(*pCRC, (const uint8*)pBuf, n);
+  *pCRC = cvi_crc32(*pCRC, (const uint8*)pBuf, n);
   return n;
 }
 
@@ -1508,7 +1508,7 @@ static bool test_archives(const char *pPath, comp_options options)
         if (!mz_zip_reader_extract_file_to_callback(&src_archive, name, dummy_zip_file_write_callback, &extracted_crc32, 0))
           status = false;
 
-        if (mz_crc32(MZ_CRC32_INIT, (const uint8*)p, extracted_size) != extracted_crc32)
+        if (cvi_crc32(MZ_CRC32_INIT, (const uint8*)p, extracted_size) != extracted_crc32)
           status = false;
 
         mz_zip_reader_extract_iter_state *pIter = mz_zip_reader_extract_file_iter_new(&src_archive, name, 0);
@@ -1516,7 +1516,7 @@ static bool test_archives(const char *pPath, comp_options options)
         mz_zip_reader_extract_iter_read(pIter, q, extracted_size);
         mz_zip_reader_extract_iter_free(pIter);
 
-        if (mz_crc32(MZ_CRC32_INIT, (const uint8*)q, extracted_size) != extracted_crc32)
+        if (cvi_crc32(MZ_CRC32_INIT, (const uint8*)q, extracted_size) != extracted_crc32)
             status = false;
 
         free(q);

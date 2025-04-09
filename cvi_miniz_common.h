@@ -37,8 +37,8 @@ typedef int mz_bool;
 typedef struct mz_dummy_time_t_tag
 {
     int m_dummy;
-} mz_dummy_time_t;
-#define MZ_TIME_T mz_dummy_time_t
+} cvi_mz_dummy_time_t;
+#define MZ_TIME_T cvi_mz_dummy_time_t
 #else
 #define MZ_TIME_T time_t
 #endif
@@ -81,9 +81,9 @@ typedef struct mz_dummy_time_t_tag
 extern "C" {
 #endif
 
-extern MINIZ_EXPORT void *miniz_def_alloc_func(void *opaque, size_t items, size_t size);
-extern MINIZ_EXPORT void miniz_def_free_func(void *opaque, void *address);
-extern MINIZ_EXPORT void *miniz_def_realloc_func(void *opaque, void *address, size_t items, size_t size);
+extern MINIZ_EXPORT void *cvi_cvi_miniz_def_alloc_func(void *opaque, size_t items, size_t size);
+extern MINIZ_EXPORT void cvi_cvi_miniz_def_free_func(void *opaque, void *address);
+extern MINIZ_EXPORT void *cvi_cvi_miniz_def_realloc_func(void *opaque, void *address, size_t items, size_t size);
 
 #define MZ_UINT16_MAX (0xFFFFU)
 #define MZ_UINT32_MAX (0xFFFFFFFFU)
