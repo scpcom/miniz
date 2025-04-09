@@ -58,7 +58,7 @@ typedef struct
     /* MZ_TRUE if the entry appears to be a directory. */
     mz_bool m_is_directory;
 
-    /* MZ_TRUE if the entry uses encryption/strong encryption (which miniz_zip doesn't support) */
+    /* MZ_TRUE if the entry uses encryption/strong encryption (which cvi_miniz_zip doesn't support) */
     mz_bool m_is_encrypted;
 
     /* MZ_TRUE if the file is not encrypted, a patch file, and if it uses a compression method we support. */
@@ -113,7 +113,7 @@ typedef enum {
     MZ_ZIP_TOTAL_TYPES
 } mz_zip_type;
 
-/* miniz error codes. Be sure to update mz_zip_get_error_string() if you add or modify this enum. */
+/* cvi_miniz error codes. Be sure to update mz_zip_get_error_string() if you add or modify this enum. */
 typedef enum {
     MZ_ZIP_NO_ERROR = 0,
     MZ_ZIP_UNDEFINED_ERROR,

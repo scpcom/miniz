@@ -106,7 +106,7 @@
      #define MINIZ_LITTLE_ENDIAN 1
      #define MINIZ_HAS_64BIT_REGISTERS 1
 
-   * On platforms using glibc, Be sure to "#define _LARGEFILE64_SOURCE 1" before including cvi_miniz.c to ensure miniz
+   * On platforms using glibc, Be sure to "#define _LARGEFILE64_SOURCE 1" before including cvi_miniz.c to ensure cvi_miniz
      uses the 64-bit variants: fopen64(), stat64(), etc. Otherwise you won't be able to process large files
      (i.e. 32-bit stat() fails for me on files > 0x7FFFFFFF bytes).
 */
@@ -393,7 +393,7 @@ MINIZ_EXPORT int cvi_uncompress2(unsigned char *pDest, mz_ulong *pDest_len, cons
 /* Returns a string description of the specified error code, or NULL if the error code is invalid. */
 MINIZ_EXPORT const char *cvi_error(int err);
 
-/* Redefine zlib-compatible names to miniz equivalents, so cvi_miniz.c can be used as a drop-in replacement for the subset of zlib that cvi_miniz.c supports. */
+/* Redefine zlib-compatible names to cvi_miniz equivalents, so cvi_miniz.c can be used as a drop-in replacement for the subset of zlib that cvi_miniz.c supports. */
 /* Define MINIZ_NO_ZLIB_COMPATIBLE_NAMES to disable zlib-compatibility if you use zlib in the same project. */
 #ifndef MINIZ_NO_ZLIB_COMPATIBLE_NAMES
 typedef unsigned char Byte;
